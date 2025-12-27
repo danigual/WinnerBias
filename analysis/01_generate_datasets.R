@@ -8,7 +8,7 @@ source("R/sim_genetics.R")
 # Usamos una muestra moderada (1000) con muchos SNPs (10000) para dificultar
 # que pasen el filtro de significación, forzando el sesgo.
 PARAMS <- list(
-  n_samples = 1000,   # Número de pacientes
+  n_samples = 5000,   # Número de pacientes
   n_snps    = 10000,  # Número de variantes genéticas
   n_causal  = 50,     # Número de variantes que realmente funcionan
   h2        = 0.5,    # Heredabilidad (50% genética, 50% ambiente)

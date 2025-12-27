@@ -21,7 +21,7 @@ get_gwas_power <- function(n, beta, maf, alpha) {
 }
 
 # 2. Configuración del escenario
-N_simulado <- 1000
+N_simulado <- 5000
 alpha_fdr_approx <- 1e-4 
 
 # Como la potencia es simétrica, graficamos la MAGNITUD desde 0 hasta 4.
