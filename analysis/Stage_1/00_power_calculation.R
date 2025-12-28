@@ -1,26 +1,14 @@
+
 # analysis/00_power_calculation.R
+
+# load the required libraries and functions
 
 library(ggplot2)
 library(dplyr)
 
-# 1. Función de Potencia 
-get_gwas_power <- function(n, beta, maf, alpha) {
-  var_g <- 2 * maf * (1 - maf)
-  
-  # ¡OJO! Aquí elevamos al cuadrado (beta^2), por lo que el signo negativo desaparece.
-  # Un beta de -2 tiene el mismo R2 que un beta de 2.
-  r2 <- (beta^2 * var_g)
-  
-  if(r2 >= 1) return(1)
-  
-  ncp <- n * r2 / (1 - r2)
-  chi_crit <- qchisq(1 - alpha, df = 1)
-  power <- 1 - pchisq(chi_crit, df = 1, ncp = ncp)
-  
-  return(power)
-}
+source("R/sim_genetics.R")
 
-# 2. Configuración del escenario
+# 1. Stage configuration (setup)
 N_simulado <- 5000
 alpha_fdr_approx <- 1e-4 
 
