@@ -35,7 +35,7 @@ grid$power <- mapply(
 
 # plot
 
-p_powe<- ggplot(grid, aes(x = beta, y = power, color = as.factor(N))) +
+p_power<- ggplot(grid, aes(x = beta, y = power, color = as.factor(N))) +
   geom_line(size = 1.1) +
   facet_wrap(~ maf, nrow = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +

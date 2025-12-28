@@ -1,22 +1,47 @@
 
-# analysis/00_power_calculation.R
+# analysis/1.0_power_calculation.R
+
+#' We calculate the statistical power of stage_1 before runing the experiment
 
 # load the required libraries and functions
 
 library(ggplot2)
 library(dplyr)
 
-source("R/sim_genetics.R")
+source("R/statistical_power.R")
 
-# 1. Stage configuration (setup)
-N_simulado <- 5000
-alpha_fdr_approx <- 1e-4 
+# 1. Stage setup
 
-# Como la potencia es simétrica, graficamos la MAGNITUD desde 0 hasta 4.
-# Esto cubre tanto los efectos pequeños (0.1) como los gigantes (3.0).
-betas_to_test <- seq(0, 4, by = 0.1) 
+PARAMS <- list(
+  n_samples = 5000,   # Número de pacientes
+  n_snps    = 10000,  # Número de variantes genéticas
+  n_causal  = 50,     # Número de variantes que realmente funcionan
+  h2        = 0.5,    # Heredabilidad (50% genética, 50% ambiente)
+  seed      = 42
+  S_deseado   <- 40            # p.ej. quieres 40 causales significativos
+  P_target    <- S_deseado / N_causal   # potencia objetivo por SNP causal
+)
 
-mafs_to_test <- c(0.1, 0.3, 0.5)
+# calcular el beta para saber poder estadistico
+
+source("R/statistical_power.R")
+
+get_beta_for_power <- function(target_power, n, maf, alpha) {
+  f <- function(beta) {
+    get_gwas_power(n = n, beta = beta, maf = maf, alpha = alpha) - target_power
+  }
+  uniroot(f, interval = c(0, 5))$root
+}
+
+beta_needed <- get_beta_for_power(
+  target_power = P_target,
+  n = N,
+  maf = maf,
+  alpha = alpha
+)
+
+beta_needed
+
 
 # 3. Construir tabla
 power_data <- expand.grid(
