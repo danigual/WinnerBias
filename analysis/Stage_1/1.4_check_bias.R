@@ -1,8 +1,8 @@
-# analysis/04_check_bias.R
+# analysis/Stage_1/1.4_check_bias.R
 library(dplyr)
 
 # 1. Cargar resultados
-gwas_results <- readRDS("data/processed/gwas_results.rds")
+gwas_results <- readRDS("data/processed/Stage_1/gwas_results.rds")
 
 # 2. Recalcular FDR y Filtrar Winners
 # Ajustamos p-valores
@@ -47,5 +47,8 @@ message("\n--- TABLA DE DATOS ---")
 print(reporte)
 
 # Guardar esta tabla en un CSV si quiere usarse luego
-write.csv(reporte, "output/winners_curse_report.csv", row.names = FALSE)
-message("\nReporte guardado en: output/winners_curse_report.csv")
+output_dir <- "output/Stage_1"
+if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+
+write.csv(reporte, file.path(output_dir, "winners_curse_report.csv"), row.names = FALSE)
+message("\nReporte guardado en: ", file.path(output_dir, "winners_curse_report.csv"))
