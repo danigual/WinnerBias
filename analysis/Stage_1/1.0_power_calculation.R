@@ -1,7 +1,7 @@
 
-# analysis/1.0_power_calculation.R
+# analysis/Stage_1/1.0_power_calculation.R
 
-#' We calculate the statistical power of stage_1 before runing the experiment
+#' We calculate the statistical power of stage_1 before running the experiment
 
 # load the required libraries and functions
 
@@ -17,8 +17,8 @@ PARAMS <- list(
   n_snps    = 10000,  # Número de variantes genéticas
   n_causal  = 50,     # Número de variantes que realmente funcionan
   h2        = 0.5,    # Heredabilidad (50% genética, 50% ambiente)
-  seed      = 42
-  S_deseado   <- 40            # p.ej. quieres 40 causales significativos
+  seed      = 42,
+  S_deseado   <- 40,            # p.ej. quieres 40 causales significativos
   P_target    <- S_deseado / N_causal   # potencia objetivo por SNP causal
 )
 
@@ -80,7 +80,7 @@ p_power <- ggplot(power_data, aes(x = beta, y = power, color = as.factor(maf_lab
 
 # 5. Guardar
 if(!dir.exists("output")) dir.create("output")
-ggsave("output/power_curves.png", p_power, width = 8, height = 6)
+ggsave("output/Stage_1/power_curves.png", p_power, width = 8, height = 6)
 
 print(p_power)
 message("Gráfico de potencia cubriendo el rango de 0 a 4.")
