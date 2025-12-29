@@ -1,7 +1,19 @@
 
 # analysis/1.0_power_calculation.R
 
-#' We calculate the statistical power of stage_1 before runing the experiment
+#' We calculate the statistical power of stage_1 before running the experiment
+#' stage_1 is characterizes by a low sample size, meaning low statistical power 
+#' and therefore high winners curse
+#' 
+#' Stage_1 characteristics:
+#' 
+#' n_samples= 
+#' n_snps=
+#' n_snps_causal= 
+#' h2= 0.5
+#' 
+#' 
+#' 
 
 # load the required libraries and functions
 
@@ -16,15 +28,13 @@ PARAMS <- list(
   n_samples = 5000,   # Número de pacientes
   n_snps    = 10000,  # Número de variantes genéticas
   n_causal  = 50,     # Número de variantes que realmente funcionan
-  h2        = 0.5,    # Heredabilidad (50% genética, 50% ambiente)
-  seed      = 42
-  S_deseado   <- 40            # p.ej. quieres 40 causales significativos
+  h2        = 0.5,    # Heredabilidad (50% genética, 50% ambiente
+  seed      = 42,
+  S_deseado   <- 40,           # p.ej. quieres 40 causales significativos
   P_target    <- S_deseado / N_causal   # potencia objetivo por SNP causal
 )
 
 # calcular el beta para saber poder estadistico
-
-source("R/statistical_power.R")
 
 get_beta_for_power <- function(target_power, n, maf, alpha) {
   f <- function(beta) {
