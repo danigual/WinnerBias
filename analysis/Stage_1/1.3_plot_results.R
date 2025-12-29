@@ -1,10 +1,10 @@
-# analysis/03_plot_results.R
+# analysis/Stage_1/1.3_plot_results.R
 
 # 1. Cargar librerías y resultados
 library(ggplot2)
 library(dplyr)
 
-results_file <- "data/processed/gwas_results.rds"
+results_file <- "data/processed/Stage_1/gwas_results.rds"
 if(!file.exists(results_file)) stop("Faltan los resultados del paso 02.")
 
 res <- readRDS(results_file)
@@ -57,7 +57,10 @@ p1 <- ggplot(res, aes(x = true_beta, y = beta_hat)) +
   coord_fixed() # Para que los ejes tengan la misma escala visual
 
 # 5. Guardar gráfico
-ggsave("output/figures/winners_curse_plot.png", plot = p1, width = 8, height = 7)
+output_dir <- "output/figures/Stage_1"
+if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+
+ggsave(file.path(output_dir, "winners_curse_plot.png"), plot = p1, width = 8, height = 7)
 
 print(p1)
-message("Gráfico generado con FDR. Guardado en analysis/winners_curse_plot.png")
+message("Gráfico generado. Guardado en output/figures/Stage_1/winners_curse_plot.png")

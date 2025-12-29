@@ -1,10 +1,10 @@
-# analysis/02_run_gwas.R
+# analysis/Stage_1/1.2_run_gwas.R
 
 # 1. Cargar herramientas
 source("R/gwas_engine.R")
 
 # 2. Cargar los datos
-input_file <- "data/processed/simulacion_wc.rds"
+input_file <- "data/processed/Stage_1/simulacion_wc.rds"
 
 # Comprobación de seguridad
 if(!file.exists(input_file)) stop("¡ALERTA! No encuentro simulacion_wc.rds. ¿Has ejecutado el script 01?")
@@ -21,9 +21,11 @@ gwas_results$true_beta <- sim_data$true_betas
 gwas_results$is_causal <- sim_data$true_betas != 0
 
 # 5. Guardar resultados
-saveRDS(gwas_results, file = "data/processed/gwas_results.rds")
 
-message("Análisis completado. Resultados guardados en data/processed/gwas_results.rds")
+output_file <- "data/processed/Stage_2/gwas_results.rds"
+saveRDS(gwas_results, file = output_file)
+message(paste("Análisis completado. Resultados guardados en", output_file))
+
 
 
 
