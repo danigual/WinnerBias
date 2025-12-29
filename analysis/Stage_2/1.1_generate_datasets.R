@@ -12,7 +12,7 @@ PARAMS <- list(
   n_snps    = 10000,  # Número de variantes genéticas
   n_causal  = 100,     # Número de variantes que realmente funcionan
   h2        = 0.5,     # Heredabilidad (50% genética, 50% ambiente)
-  seed      = 666      
+  seed      = 42      
 )
 
 # 3. Ejecutar la simulación
