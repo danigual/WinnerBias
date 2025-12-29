@@ -12,6 +12,10 @@ source("R/statistical_power.R")
 
 # 1. Stage setup
 
+S_deseado <- 40
+n_causal <- 50
+
+
 PARAMS <- list(
   n_samples = 5000,   # Número de pacientes
   n_snps    = 10000,  # Número de variantes genéticas
@@ -19,7 +23,7 @@ PARAMS <- list(
   h2        = 0.5,    # Heredabilidad (50% genética, 50% ambiente)
   seed      = 42,
   S_deseado   <- 40,            # p.ej. quieres 40 causales significativos
-  P_target    <- S_deseado / N_causal   # potencia objetivo por SNP causal
+  P_target    <- S_deseado / n_causal   # potencia objetivo por SNP causal
 )
 
 # calcular el beta para saber poder estadistico
@@ -33,6 +37,11 @@ get_beta_for_power <- function(target_power, n, maf, alpha) {
   uniroot(f, interval = c(0, 5))$root
 }
 
+# Variables para simulación
+N <- PARAMS$n_samples
+maf <- 0.1  # ejemplo
+alpha <- 5e-8
+
 beta_needed <- get_beta_for_power(
   target_power = P_target,
   n = N,
@@ -40,10 +49,19 @@ beta_needed <- get_beta_for_power(
   alpha = alpha
 )
 
-beta_needed
+print (beta_needed)
 
 
 # 3. Construir tabla
+
+
+# Valores para probar en el gráfico
+betas_to_test <- seq(0, 4, by = 0.1)
+mafs_to_test <- c(0.01, 0.05, 0.1, 0.3)
+N_simulado <- N
+alpha_fdr_approx <- alpha
+
+#Table
 power_data <- expand.grid(
   beta = betas_to_test,
   maf = mafs_to_test
@@ -59,13 +77,12 @@ power_data$maf_label <- paste("MAF =", power_data$maf)
 
 # 4. Graficar
 p_power <- ggplot(power_data, aes(x = beta, y = power, color = as.factor(maf_label))) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth= 1.2) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") + 
   
   # Añadimos un rectángulo sombreado para mostrar la "Zona de Peligro"
   # (Donde la potencia es baja)
-  annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 1, 
-           alpha = 0.1, fill = "red") +
+  annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 1, alpha = 0.1, fill = "red") +
   annotate("text", x = 0.25, y = 0.5, label = "Zona de\nRiesgo", color = "red", angle = 90) +
   
   labs(
