@@ -1,8 +1,8 @@
 # analysis/parms_selection.R
 
-#' A graph is created showing how statistical power changes with 
+#' A graph is created showing how statistical power, of each SNP in a GWAS, changes with 
 #' sample size, number of SNPs tested and effect size.
-#' Taking into account an MAF = 0.3 and an alpha = 0.05.
+#' Taking into account a MAF = 0.3 and an alpha = 0.05.
 #' 
 #' These graph will help us determine the parameters to use in each scenario.
 
@@ -45,7 +45,7 @@ p_power <- ggplot(grid, aes(x = beta, y = power, color = as.factor(Nsnps))) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
   scale_x_continuous(expand = expansion(mult = 0.05)) +
   labs(
-    title = "Potencia estadística según N, β y número total de SNPs",
+    title = "Potencia estadística de cada SNP en función de N, β y número total de SNPs",
     subtitle = "MAF fijo = 0.3, umbral Bonferroni = 0.05 / N_SNPs",
     x = "Beta (tamaño del efecto)",
     y = "Potencia",
