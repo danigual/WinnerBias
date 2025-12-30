@@ -18,18 +18,12 @@ PARAMS <- list(
   seed      = 42
 )
 
-# set seed and alpha
+# set seed, alpha
 set.seed(PARAMS$seed)
 alpha_gwas <- 0.05 / PARAMS$n_snps
+maf_causal <- 0.3
 
-# 1. simulate different MAFs for each causal SNP
-maf_causal <- runif(
-  PARAMS$n_causal,
-  min = 0.1,
-  max = 0.5
-)
-
-# 2. simulate heterogeneous betas
+# 1. simulate heterogeneous betas
 beta_raw <- rnorm(PARAMS$n_causal, mean = 0, sd = 1)
 
 # genetic variance induced by these betas
@@ -42,7 +36,7 @@ scale_factor <- sqrt(PARAMS$h2 / genetic_var_raw)
 
 beta_causal <- beta_raw * scale_factor
 
-# 3. power by causal SNP
+# 2. power by causal SNP
 power_per_snp <- mapply(
   get_gwas_power,
   n     = PARAMS$n_samples,
@@ -68,7 +62,7 @@ output <- list(
 
 output
 
-# 4. Save data
+# 3. Save data
 
 # RDS format
 # we create the folder if it does not exist (for security reasons).
