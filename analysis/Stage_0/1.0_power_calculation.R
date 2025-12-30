@@ -1,4 +1,4 @@
-# analysis/Stage_1/1.1_generate_datasets.R
+# analysis/Stage_0/1.1_generate_datasets.R
 
 #' Before conducting the experiment, the statistical power is calculated in 
 #' order to identify its quality. if it is 0.8, 
@@ -73,7 +73,7 @@ global_df <- as.data.frame(t(output2))
 
 # RDS format
 # we create the folder if it does not exist (for security reasons).
-dir_stage1 <- "data/processed/Stage_1"
+dir_stage1 <- "data/processed/Stage_0"
 if(!dir.exists(dir_stage1)) dir.create(dir_stage1, recursive = TRUE)
 
 output_file <- file.path(dir_stage1, "statistical_power.rds")
@@ -82,7 +82,7 @@ saveRDS(output, file = output_file)
 
 # CSV format (only the global output)
 # we create the folder if it does not exist (for security reasons).
-output_dir <- "output/Stage_1"
+output_dir <- "output/Stage_0"
 if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
 write.csv(global_df, file.path(output_dir, "statistical_power.csv"), row.names = FALSE)
