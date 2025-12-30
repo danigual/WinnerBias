@@ -1,53 +1,54 @@
-# analysis/Stage_1/1.4_check_bias.R
+# analysis/Stage_0/1.4_check_bias.R
+
+
+# 1. load libraries and results
 library(dplyr)
+gwas_results <- readRDS("data/processed/Stage_0/gwas_results.rds")
 
-# 1. Cargar resultados
-gwas_results <- readRDS("data/processed/Stage_1/gwas_results.rds")
-
-# 2. Recalcular FDR y Filtrar Winners
-# Ajustamos p-valores
+# 2. recalculate FDR and Filter Winners
+# We adjust p-values
 gwas_results$qval <- p.adjust(gwas_results$pval, method = "fdr")
 
-# Nos quedamos con los que son significativos (Winners) Y además son reales (Causales)
+# We keep the ones that are significant (Winners) and also real (Causal)
 winners <- subset(gwas_results, qval < 0.05 & is_causal)
 
 if(nrow(winners) == 0) stop("No hay winners para analizar.")
 
-# 3. Calcular el Sesgo (Bias) y el Porcentaje de Inflación
+# 3. calculate Bias and Inflation Percentage
 winners <- winners %>%
   mutate(
-    # Diferencia absoluta
+    # absolute difference
     bias = beta_hat - true_beta,
     
-    # Porcentaje de error respecto al valor real
+    # percentage error relative to actual value
     inflacion_pct = round(((beta_hat - true_beta) / true_beta) * 100, 2),
     
-    # Etiqueta para entenderlo rápido
+    # label for quick understanding
     tipo_error = ifelse(abs(beta_hat) > abs(true_beta), "Inflado (Curse)", "Subestimado")
   )
 
-# 4. Generar Reporte Limpio
-# Seleccionamos las columnas más importantes para ver
+# 4. generate clean report
+# select the most important columns to view
 reporte <- winners %>%
   select(snp_id, true_beta, beta_hat, inflacion_pct, tipo_error) %>%
-  arrange(desc(abs(inflacion_pct))) # Ordenar por los más exagerados
+  arrange(desc(abs(inflacion_pct))) # sort by most exaggerated
 
 message("--- REPORTE DETALLADO DE WINNER'S CURSE ---")
 message("Total de Causales detectados: ", nrow(winners))
 
-# Conteo de casos
+# case count
 print(table(winners$tipo_error))
 
-# Inflación media (solo de los inflados para ser más justos con el concepto de Curse, 
-# o de todos para ver el sesgo general. Aquí ponemos la media global del valor absoluto).
+# average inflation (only for those inflated to be fairer to Curse's concept, 
+# or for all to see the general bias. Here we give the overall average of the absolute value)
 mean_inflation <- mean(abs(winners$inflacion_pct))
 message("\nError porcentual promedio (en valor absoluto): ", round(mean_inflation, 2), "%")
 
 message("\n--- TABLA DE DATOS ---")
 print(reporte)
 
-# Guardar esta tabla en un CSV si quiere usarse luego
-output_dir <- "output/Stage_1"
+# save data
+output_dir <- "output/Stage_0"
 if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
 write.csv(reporte, file.path(output_dir, "winners_curse_report.csv"), row.names = FALSE)
