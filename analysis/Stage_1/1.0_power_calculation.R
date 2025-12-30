@@ -45,22 +45,31 @@ power_per_snp <- mapply(
   MoreArgs = list(alpha = alpha_gwas)
 )
 
-# global output 
+# output 
 
 mean_power    <- mean(power_per_snp)
 expected_hits <- sum(power_per_snp)
-global_power  <- 1 - prod(1 - power_per_snp)
 
 output <- list(
   maf_causal     = maf_causal,
   beta_causal    = beta_causal,
   power_per_snp  = power_per_snp,
   mean_power     = mean_power,
-  expected_hits  = expected_hits,
-  global_power   = global_power
+  expected_hits  = expected_hits
 )
 
 output
+
+# global output
+
+output2 <- c(
+  mean_power   = output$mean_power,
+  expected_hits = output$expected_hits
+)
+
+global_df <- as.data.frame(t(output2))
+
+global_df
 
 # 3. Save data
 
@@ -78,10 +87,10 @@ saveRDS(output, file = output_file)
 output_dir <- "output/Stage_1"
 if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
-write.csv(output, file.path(output_dir, "statistical_power.csv"), row.names = FALSE)
+write.csv(global_df, file.path(output_dir, "statistical_power.csv"), row.names = FALSE)
 
 message(paste0(
   "Datos generados y guardados en: ", output_file,
   " en formato RDS y en: ", output_dir,
-  " en formato CSV"
+  " en formato CSV (solo datos globales)"
 ))
