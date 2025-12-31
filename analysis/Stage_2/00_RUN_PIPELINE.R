@@ -1,10 +1,10 @@
 # analysis/Stage_2/00_RUN_PIPELINE.R
 
 # ==============================================================================
-# MASTER PIPELINE: STAGE 1 (Winner's Curse Simulation & Correction)
+# MASTER PIPELINE: STAGE 2 (Winner's Curse Simulation & Correction)
 # ==============================================================================
 # DESCRIPTION:
-# This script orchestrates the sequential execution of the Stage 1 analysis.
+# This script orchestrates the sequential execution of the Stage 2 analysis.
 # It proceeds from synthetic data generation through GWAS to bias correction.
 #
 # EXECUTION FLOW:
@@ -22,6 +22,14 @@ rm(list = ls())
 # Close any open graphics devices
 graphics.off()
 
+# [SAFETY CHECK] Ensure we are in the Project Root
+if(!dir.exists("analysis") || !dir.exists("R")) {
+  stop("❌ ERROR DE DIRECTORIO:
+       Estás ejecutando el script desde la carpeta equivocada.
+       Por favor, configura el Working Directory en la RAÍZ del proyecto.
+       (Ej. setwd('C:/Mi_Proyecto_TFM/'))")
+}
+
 # Define current stage for logging
 CURRENT_STAGE <- "Stage_2"
 
@@ -34,6 +42,8 @@ message(paste0("============================================================"))
 
 # 2. SEQUENTIAL EXECUTION
 # ------------------------------------------------------------------------------
+# We use local=TRUE (default) or FALSE depending on preference, but here
+# simply source() is fine as scripts are self-contained or load what they need.
 
 # --- STEP 1.1: Data Generation ---
 message("\n>>> [1/5] Running 1.1: Dataset Generation...")

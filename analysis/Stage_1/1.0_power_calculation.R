@@ -1,4 +1,4 @@
-# analysis/Stage_1/1.1_generate_datasets.R
+# analysis/Stage_1/1.0_power_calculation.R
 
 #' Before conducting the experiment, the statistical power is calculated in 
 #' order to identify its quality. if it is 0.8, 
@@ -24,7 +24,7 @@ alpha_gwas <- 0.05 / PARAMS$n_snps
 maf_causal <- 0.3
 
 # 1. simulate heterogeneous betas
-beta_raw <- rnorm(PARAMS$n_causal, mean = 0, sd = 1)
+beta_raw <- rnorm(PARAMS$n_causal, mean = 0, sd = 0.2)
 
 # genetic variance induced by these betas
 genetic_var_raw <- sum(
