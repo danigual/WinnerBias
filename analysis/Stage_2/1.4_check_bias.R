@@ -1,54 +1,85 @@
 # analysis/Stage_2/1.4_check_bias.R
-library(dplyr)
 
-# 1. Cargar resultados
+library(dplyr)
+library(ggplot2)
+
+# 1. Load results
 gwas_results <- readRDS("data/processed/Stage_2/gwas_results.rds")
 
-# 2. Recalcular FDR y Filtrar Winners
-# Ajustamos p-valores
-gwas_results$qval <- p.adjust(gwas_results$pval, method = "fdr")
+# 2. Data Preparation
+GWAS_THRESHOLD <- 5e-8
+winners <- subset(gwas_results, pval < GWAS_THRESHOLD & is_causal)
 
-# Nos quedamos con los que son significativos (Winners) Y además son reales (Causales)
-winners <- subset(gwas_results, qval < 0.05 & is_causal)
+if(nrow(winners) == 0) {
+  stop("STOPPED: No significant winners. Cannot calculate bias.")
+}
 
-if(nrow(winners) == 0) stop("No hay winners para analizar.")
+# 3. Calculate Metrics
+winners$z_score <- abs(winners$beta_hat / winners$se)
 
-# 3. Calcular el Sesgo (Bias) y el Porcentaje de Inflación
 winners <- winners %>%
   mutate(
-    # Diferencia absoluta
     bias = beta_hat - true_beta,
-    
-    # Porcentaje de error respecto al valor real
-    inflacion_pct = round(((beta_hat - true_beta) / true_beta) * 100, 2),
-    
-    # Etiqueta para entenderlo rápido
-    tipo_error = ifelse(abs(beta_hat) > abs(true_beta), "Inflado (Curse)", "Subestimado")
+    bias_sq = (beta_hat - true_beta)^2,
+    bias_pct = ((beta_hat - true_beta) / true_beta) * 100,
+    type = ifelse(abs(beta_hat) > abs(true_beta), "Inflated (Curse)", "Underestimated")
   )
 
-# 4. Generar Reporte Limpio
-# Seleccionamos las columnas más importantes para ver
-reporte <- winners %>%
-  select(snp_id, true_beta, beta_hat, inflacion_pct, tipo_error) %>%
-  arrange(desc(abs(inflacion_pct))) # Ordenar por los más exagerados
+# 4. REPORTING
+mse_global     <- mean(winners$bias_sq)
+rmse_global    <- sqrt(mse_global)
+mean_abs_inflation <- mean(abs(winners$bias_pct))
 
-message("--- REPORTE DETALLADO DE WINNER'S CURSE ---")
-message("Total de Causales detectados: ", nrow(winners))
+message("\n==================================================")
+message("    EVALUATION METRICS (Method: A. Forde)         ")
+message("==================================================")
+message(paste(" Total Winners    :", nrow(winners)))
+message(paste(" RMSE (Error)     :", round(rmse_global, 6)))
+message(paste(" Mean Inflation   :", round(mean_abs_inflation, 2), "%"))
+message("==================================================")
 
-# Conteo de casos
-print(table(winners$tipo_error))
+# 5. Save Files
+report_dir <- "output/Stage_2"
+if(!dir.exists(report_dir)) dir.create(report_dir, recursive = TRUE)
 
-# Inflación media (solo de los inflados para ser más justos con el concepto de Curse, 
-# o de todos para ver el sesgo general. Aquí ponemos la media global del valor absoluto).
-mean_inflation <- mean(abs(winners$inflacion_pct))
-message("\nError porcentual promedio (en valor absoluto): ", round(mean_inflation, 2), "%")
+metrics_report <- data.frame(
+  Metric = c("MSE", "RMSE", "Mean_Inflation_Pct", "N_Winners"), 
+  Value = c(mse_global, rmse_global, mean_abs_inflation, nrow(winners))
+)
+write.csv(metrics_report, file.path(report_dir, "forde_metrics.csv"), row.names = FALSE)
+write.csv(winners, file.path(report_dir, "winners_curse_report.csv"), row.names = FALSE)
 
-message("\n--- TABLA DE DATOS ---")
-print(reporte)
+# 6. Plot Z-score vs Bias 
+# ------------------------------------------------------------------------------
+p_forde <- ggplot(winners, aes(x = z_score, y = bias_pct)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  
+  # Points
+  geom_point(aes(color = type), size = 4, alpha = 0.8) +
+  
+  scale_color_manual(values = c("Inflated (Curse)" = "#E41A1C", "Underestimated" = "#377EB8")) +
+  
+  labs(
+    title = "Winner's Curse Magnitude",
+    subtitle = paste0("Observed inflation for the ", nrow(winners), " detected variants."),
+    y = "Inflation (%)", 
+    x = "Z-score (Signal Strength)",
+    color = "Bias Type"
+  ) +
+  
+  # --- CLEAN THEME ---
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold"),
+    legend.background = element_rect(fill = "white", color = NA)
+  )
 
-# Guardar esta tabla en un CSV si quiere usarse luego
-output_dir <- "output/Stage_2"
-if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+# Save
+fig_dir <- "output/figures/Stage_2"
+if(!dir.exists(fig_dir)) dir.create(fig_dir, recursive = TRUE)
 
-write.csv(reporte, file.path(output_dir, "winners_curse_report.csv"), row.names = FALSE)
-message("\nReporte guardado en: ", file.path(output_dir, "winners_curse_report.csv"))
+ggsave(file.path(fig_dir, "bias_vs_zscore.png"), p_forde, width = 7, height = 5, dpi = 300)
+message(paste("Diagnostic plot saved:", file.path(fig_dir, "bias_vs_zscore.png")))
