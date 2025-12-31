@@ -1,22 +1,32 @@
 # analysis/Stage_2/1.3_plot_results.R
 
-# 1. Load libraries and results
+# 1. Load libraries and Dynamic Config
 library(ggplot2)
 library(dplyr)
 
-results_file <- "data/processed/Stage_2/gwas_results.rds"
-if(!file.exists(results_file)) stop("ERROR! Results missing (gwas_results.rds). Run 1.2 first.")
+# Dynamic Configuration
+# If run standalone, defaults to Stage_2. If run by Master Script, uses the active Stage.
+if(!exists("STAGE_NAME")) STAGE_NAME <- "Stage_2"
+
+# 2. Load Results
+# Dynamic path: reads from the folder corresponding to the active Stage
+results_file <- file.path("data/processed", STAGE_NAME, "gwas_results.rds")
+
+if(!file.exists(results_file)) {
+  stop(paste0("ERROR! Results missing (gwas_results.rds) in ", STAGE_NAME, 
+              ".\n    -> Please run 1.2 first."))
+}
 
 res <- readRDS(results_file)
 
-# 2. Define "Significant" (Consistent with Step 1.2)
+# 3. Define "Significant" (Consistent with Step 1.2)
 # ------------------------------------------------------------------------------
 # Using standard GWAS threshold (Bonferroni)
 GWAS_THRESHOLD <- 5e-8
 
 res$is_significant <- res$pval < GWAS_THRESHOLD
 
-# 3. Categorize points (Labeling)
+# 4. Categorize points (Labeling)
 # ------------------------------------------------------------------------------
 res <- res %>%
   mutate(category = case_when(
@@ -38,13 +48,13 @@ res$category <- factor(res$category, levels = c(
 n_winners <- sum(res$category == "Winner (Detected Causal)")
 n_fp      <- sum(res$category == "False Positive")
 
-# 4. PLOT: The Anatomy of Winner's Curse (CLEAN STYLE)
+# 5. PLOT: The Anatomy of Winner's Curse (CLEAN STYLE)
 # ------------------------------------------------------------------------------
 p1 <- ggplot(res, aes(x = true_beta, y = beta_hat)) +
   
   # A. Noise Layer (Grey, very transparent)
   geom_point(data = subset(res, category == "Background Noise"), 
-             color = "grey90", alpha = 0.3, size = 1) + # Lighter grey for classic theme
+             color = "grey90", alpha = 0.3, size = 1) + 
   
   # B. Missed Causal Layer (Blue)
   geom_point(data = subset(res, category == "Missed Causal (Low Power)"), 
@@ -69,7 +79,7 @@ p1 <- ggplot(res, aes(x = true_beta, y = beta_hat)) +
   
   # Labels
   labs(
-    title = "Winner's Curse Effect: Truth vs. Estimation",
+    title = paste0("Winner's Curse Effect: Truth vs. Estimation (", STAGE_NAME, ")"),
     subtitle = paste0("Threshold P < 5e-8 | Winners: ", n_winners, " | False Positives: ", n_fp, 
                       "\nRed points (Winners) tend to be inflated away from the diagonal."),
     x = "TRUE Effect (True Beta)",
@@ -79,19 +89,21 @@ p1 <- ggplot(res, aes(x = true_beta, y = beta_hat)) +
   
   # --- CLEAN THEME APPLIED ---
   theme_classic() + 
-  coord_fixed(xlim = c(-0.6, 0.6), ylim = c(-0.6, 0.6)) + # Zoom centered
+  coord_fixed(xlim = c(-0.6, 0.6), ylim = c(-0.6, 0.6)) + 
   theme(
     legend.position = "bottom",
-    panel.grid.major = element_blank(), # REMOVED GRID
-    panel.grid.minor = element_blank(), # REMOVED GRID
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
     axis.text = element_text(color = "black"),
     plot.title = element_text(face = "bold"),
     legend.background = element_rect(fill = "white", color = NA)
   )
 
-# 5. Save and Report
+# 6. Save and Report
 # ------------------------------------------------------------------------------
-output_dir <- "output/figures/Stage_2"
+# Dynamic output directory
+output_dir <- file.path("output/figures", STAGE_NAME)
+
 if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
 ggsave(file.path(output_dir, "winners_curse_plot.png"), plot = p1, width = 8, height = 7, dpi = 300)
@@ -100,4 +112,4 @@ ggsave(file.path(output_dir, "winners_curse_plot.png"), plot = p1, width = 8, he
 message("\n--- CLASSIFICATION SUMMARY ---")
 print(table(res$category))
 message("--------------------------------")
-message("Plot saved to: output/figures/Stage_2/winners_curse_plot.png")
+message(paste("Plot saved to:", file.path(output_dir, "winners_curse_plot.png")))

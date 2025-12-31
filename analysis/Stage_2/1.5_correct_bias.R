@@ -8,21 +8,41 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
-# 1. Load Correction Function
+# 1. Dynamic Configuration & Load Tools
+# ------------------------------------------------------------------------------
+if(!exists("STAGE_NAME")) STAGE_NAME <- "Stage_2"
+
 if(!file.exists("R/bootstrap_correction.R")) stop("ATTENTION! R/bootstrap_correction.R is missing")
 source("R/bootstrap_correction.R")
 
+# Dynamic Paths
+sim_file     <- file.path("data/processed", STAGE_NAME, "simulacion_wc.rds")
+gwas_file    <- file.path("data/processed", STAGE_NAME, "gwas_results.rds")
+out_fig_dir  <- file.path("output/figures", STAGE_NAME)
+out_data_dir <- file.path("data/processed", STAGE_NAME)
+
+# Create output directories if they don't exist
+if(!dir.exists(out_fig_dir)) dir.create(out_fig_dir, recursive = TRUE)
+if(!dir.exists(out_data_dir)) dir.create(out_data_dir, recursive = TRUE)
+
 # 2. Load Data
-message(">>> Loading simulation data and GWAS results...")
-sim_data <- readRDS("data/processed/Stage_2/simulacion_wc.rds")
-gwas_res <- readRDS("data/processed/Stage_2/gwas_results.rds")
+# ------------------------------------------------------------------------------
+message(paste0(">>> Loading simulation data and GWAS results (", STAGE_NAME, ")..."))
+
+if(!file.exists(sim_file) || !file.exists(gwas_file)) {
+  stop(paste0("STOPPED: Data missing in ", STAGE_NAME, ". Run 1.1 and 1.2 first."))
+}
+
+sim_data <- readRDS(sim_file)
+gwas_res <- readRDS(gwas_file)
 
 # 3. Filter Winners
+# ------------------------------------------------------------------------------
 GWAS_THRESHOLD <- 5e-8
 winners <- gwas_res %>% filter(pval < GWAS_THRESHOLD)
 
 if(nrow(winners) == 0) {
-  stop("No significant winners. Check N or Betas in 1.1")
+  stop(paste0("No significant winners in ", STAGE_NAME, ". Check N or Betas in 1.1"))
 }
 
 message(paste(">>> Winners detected for correction:", nrow(winners)))
@@ -57,7 +77,7 @@ winners_corrected$ci_lower <- winners_corrected$beta_corrected - 1.96 * winners_
 winners_corrected$ci_upper <- winners_corrected$beta_corrected + 1.96 * winners_corrected$beta_corrected_se
 
 message("\n==================================================")
-message("             CORRECTION RESULTS                   ")
+message(paste0("             CORRECTION RESULTS (", STAGE_NAME, ")"))
 message("==================================================")
 message(paste(" Original RMSE   :", round(rmse_naive, 4)))
 message(paste(" Corrected RMSE  :", round(rmse_corrected, 4)))
@@ -126,7 +146,7 @@ p_corr <- ggplot(winners_corrected) +
   scale_color_manual(name = "Estimate Type", 
                      values = c("Original (Inflated)" = "#E41A1C", "Corrected (Bootstrap)" = "#4DAF4A")) +
   
-  labs(title = "Winner's Curse Correction (Bootstrap Bagging)",
+  labs(title = paste0("Winner's Curse Correction - ", STAGE_NAME),
        subtitle = subtitle_text,
        x = "TRUE Effect (Simulated)", 
        y = "ESTIMATED Effect (GWAS)") +
@@ -142,11 +162,8 @@ p_corr <- ggplot(winners_corrected) +
   )
 
 # Save
-out_dir <- "output/figures/Stage_2"
-if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+ggsave(file.path(out_fig_dir, "bias_correction.png"), p_corr, width = 8, height = 7, dpi = 300)
+saveRDS(winners_corrected, file.path(out_data_dir, "winners_corrected.rds"))
 
-ggsave(file.path(out_dir, "bias_correction_stage2.png"), p_corr, width = 8, height = 7, dpi = 300)
-saveRDS(winners_corrected, "data/processed/Stage_2/winners_corrected.rds")
-
-message(paste("Plot saved to", file.path(out_dir, "bias_correction_stage2.png")))
+message(paste("Plot saved to", file.path(out_fig_dir, "bias_correction.png")))
 print(p_corr)
