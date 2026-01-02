@@ -1,125 +1,95 @@
-# analysis/Stage_2/1.0_power_calculation.R
+# analysis/Stage_0/1.1_generate_datasets.R
 
-#' Calculate the statistical power of Stage_2 before running the experiment.
-#' Justifies why we expect Winner's Curse (Low Power).
+#' Before conducting the experiment, the statistical power is calculated in 
+#' order to identify its quality. if it is 0.8, 
+#' the experiment has good statistical power.
 
-library(ggplot2)
-library(dplyr)
+# load required libraries and functions
 
 source("R/statistical_power.R")
 
-# 1. Scenario Configuration (Stage 2: Low Power Scenario)
-n_samples_stage2 <- 1000  # Low N to induce Winner's Curse
-n_causal_total   <- 100
-s_desired        <- 20    # Number of causal SNPs we ideally want to detect
+# set the parameters 
 
 PARAMS <- list(
-  n_samples = n_samples_stage2,
+  n_samples = 1000,
   n_snps    = 10000,
-  n_causal  = n_causal_total,
+  n_causal  = 100,
   h2        = 0.5,
-  alpha     = 5e-8,
-  target_power = s_desired / n_causal_total 
+  seed      = 42,
+  alpha     = 5e-8
 )
 
-# 2. Inverse Calculation (Beta required for 80% Power)
-# We specifically use MAF = 0.3 because that represents our simulated causal variants
-maf_simulation <- 0.3
+# set seed, alpha and MAF
+set.seed(PARAMS$seed)
+alpha_gwas <- PARAMS$alpha / PARAMS$n_snps
+maf_causal <- 0.3
 
-get_beta_for_power <- function(target_power, n, maf, alpha) {
-  f <- function(beta) {
-    get_gwas_power(n = n, beta = beta, maf = maf, alpha = alpha) - target_power
-  }
-  tryCatch(uniroot(f, interval = c(0, 5))$root, error = function(e) NA)
-}
+# 1. simulate heterogeneous betas
+beta_raw <- rnorm(PARAMS$n_causal, mean = 0, sd = 0.125)
 
-beta_80pct <- get_beta_for_power(0.80, PARAMS$n_samples, maf = maf_simulation, alpha = PARAMS$alpha)
-
-# [CORRECTION] Added explicit mention of MAF in the console output
-message(paste0("For 80% power (N=", PARAMS$n_samples, ", MAF=", maf_simulation, "), required Beta: ", round(beta_80pct, 3)))
-
-# 3. Build Curves Table
-betas_to_test <- seq(0, 0.6, by = 0.01)
-mafs_to_test  <- c(0.05, 0.1, 0.3, 0.5)
-
-power_data <- expand.grid(
-  beta = betas_to_test,
-  maf  = mafs_to_test
+# genetic variance induced by these betas
+genetic_var_raw <- sum(
+  2 * maf_causal * (1 - maf_causal) * beta_raw^2
 )
 
-power_data$power <- mapply(
-  get_gwas_power, 
-  n     = PARAMS$n_samples, 
-  beta  = power_data$beta, 
-  maf   = power_data$maf, 
-  alpha = PARAMS$alpha
+# scale factor so that the total h2 is as desired
+scale_factor <- sqrt(PARAMS$h2 / genetic_var_raw)
+
+beta_causal <- beta_raw * scale_factor
+
+# 2. power by causal SNP
+power_per_snp <- mapply(
+  get_gwas_power,
+  n     = PARAMS$n_samples,
+  beta  = abs(beta_causal),
+  maf   = maf_causal,
+  MoreArgs = list(alpha = alpha_gwas)
 )
 
-# Factor for ordered legend
-power_data$maf_label <- factor(
-  paste("MAF =", power_data$maf),
-  levels = paste("MAF =", sort(unique(power_data$maf)))
+# output 
+
+mean_power    <- mean(power_per_snp)
+expected_hits <- sum(power_per_snp)
+
+output <- list(
+  maf_causal     = maf_causal,
+  beta_causal    = beta_causal,
+  power_per_snp  = power_per_snp,
+  mean_power     = mean_power,
+  expected_hits  = expected_hits
 )
 
-# 4. Plotting
+output
 
-beta_real_simulation <- 0.125
+# global output
 
-# Calculate exact power for your specific simulation point (to plot the dot)
-power_simulation <- get_gwas_power(PARAMS$n_samples, beta_real_simulation, maf_simulation, PARAMS$alpha)
+output2 <- c(
+  mean_power   = output$mean_power,
+  expected_hits = output$expected_hits
+)
 
-p_power <- ggplot(power_data, aes(x = beta, y = power, color = maf_label)) +
-  # 1. Risk Zone (Background)
-  annotate("rect", xmin = 0, xmax = 0.25, ymin = 0, ymax = 1, alpha = 0.1, fill = "red") +
-  annotate("text", x = 0.02, y = 0.95, label = "WINNER'S CURSE\nZONE", 
-           color = "#D73027", hjust=0, fontface = "bold", size = 3.5) +
-  
-  # 2. Reference Lines
-  geom_hline(yintercept = 0.8, linetype = "dashed", color = "darkgray", linewidth = 0.6) + 
-  annotate("text", x = 0.45, y = 0.82, label = "Ideal Power (80%)", color = "darkgray", size = 3.5) +
-  
-  # 3. Power Curves
-  geom_line(linewidth = 1.2) +
-  
-  # [MEJORA CLAVE] Highlight specific Simulation Point
-  # Vertical line
-  geom_vline(xintercept = beta_real_simulation, linetype = "dotted", color = "blue", linewidth = 1) +
-  
-  # The specific DOT where your simulation lives (Beta 0.125, MAF 0.3)
-  annotate("point", x = beta_real_simulation, y = power_simulation, color = "blue", size = 4) +
-  
-  # Label explaining the dot
-  annotate("text", x = beta_real_simulation + 0.02, y = 0.45, 
-           label = paste0("\n(Beta=", beta_real_simulation, ", MAF=", maf_simulation, ")\nPower ~ ", round(power_simulation*100,1), "%"), 
-           color = "blue", hjust = 0, fontface = "italic", size = 3.5) +
-  
-  # 4. Aesthetics
-  labs(
-    title = paste0("Stage 2 Power Analysis (N = ", PARAMS$n_samples, ")"),
-    subtitle = paste0("At Beta=", beta_real_simulation, " and MAF=", maf_simulation, ", statistical power is very low."),
-    x = "Effect Size (True Beta)",
-    y = "Statistical Power",
-    color = "Frequency (MAF)"
-  ) +
-  
-  scale_y_continuous(labels = scales::percent, limits = c(0, 1), expand = c(0, 0)) +
-  scale_x_continuous(limits = c(0, 0.6), expand = c(0, 0)) +
-  
-  theme_classic() +
-  theme(
-    legend.position = "bottom",
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.text = element_text(size = 11, color = "black"),
-    axis.title = element_text(size = 12, face = "bold"),
-    plot.title = element_text(size = 14, face = "bold"),
-    legend.background = element_rect(fill = "white", color = NA)
-  )
+global_df <- as.data.frame(t(output2))
 
-# 5. Save
-output_dir <- "output/figures/Stage_2"
+# 3. Save data
+
+# RDS format
+# we create the folder if it does not exist (for security reasons).
+dir_stage1 <- "data/processed"
+if(!dir.exists(dir_stage1)) dir.create(dir_stage1, recursive = TRUE)
+
+output_file <- file.path(dir_stage1, "statistical_power.rds")
+saveRDS(output, file = output_file)
+
+
+# CSV format (only the global output)
+# we create the folder if it does not exist (for security reasons).
+output_dir <- "output"
 if(!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
-ggsave(file.path(output_dir, "power_curves.png"), p_power, width = 8, height = 6)
+write.csv(global_df, file.path(output_dir, "statistical_power.csv"), row.names = FALSE)
 
-print(p_power)
+message(paste0(
+  "Datos generados y guardados en: ", output_file,
+  " en formato RDS y en: ", output_dir,
+  " en formato CSV (solo datos globales)"
+))

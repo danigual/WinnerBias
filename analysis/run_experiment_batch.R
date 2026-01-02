@@ -46,6 +46,7 @@ SCENARIOS <- list(
 # We use the scripts in analysis/Stage_2/ as "Master Templates".
 # Thanks to parameterization, these scripts will adapt to the active Stage.
 scripts_to_run <- c(
+  "analysis/Stage_2/1.0_power_calculation.R",  # Generate the estimated power
   "analysis/Stage_2/1.1_generate_datasets.R",  # Generate simulation
   "analysis/Stage_2/1.2_run_gwas.R",           # Run GWAS
   "analysis/Stage_2/1.3_plot_results.R",       # Plot Real vs Estimated
