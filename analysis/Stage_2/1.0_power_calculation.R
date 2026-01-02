@@ -10,15 +10,17 @@ source("R/statistical_power.R")
 
 # 1. Dynamic Configuration & Tools
 # ------------------------------------------------------------------------------
-# If run standalone (without Master Script), default to Stage 2
-if(!exists("STAGE_NAME")) {
+# If run standalone (without Master Script), define defaults (Stage 2)
+
+if (!exists("PARAMS")) {
   STAGE_NAME <- "Stage_2"
+  
   PARAMS <- list(
-    n_samples = 1000, 
-    n_snps    = 10000, 
+    n_samples = 2000, 
+    n_snps    = 1000, 
     n_causal  = 100, 
     h2        = 0.5, 
-    mean_beta = 0.125, 
+    mean_beta = 0.5, 
     seed      = 42,
     maf       = 0.3
   )
@@ -38,11 +40,11 @@ beta_raw <- rnorm(PARAMS$n_causal, mean = 0, sd = PARAMS$mean_beta)
 
 # genetic variance induced by these betas
 genetic_var_raw <- sum(
-  2 * PARAMS$maf * (1 - PARAMS$maf) * beta_raw^2
+  2 * 0.3 * (1 - 0.3) * beta_raw^2
 )
 
 # scale factor so that the total h2 is as desired
-scale_factor <- sqrt(PARAMS$h2 / genetic_var_raw)
+scale_factor <- sqrt(PARAMS$h2 / max(genetic_var_raw, 1e-12))
 beta_causal <- beta_raw * scale_factor
 
 # 4. Calculate statistical power
@@ -52,8 +54,8 @@ power_per_snp <- mapply(
   get_gwas_power,
   n     = PARAMS$n_samples,
   beta  = abs(beta_causal),
-  maf   = PARAMS$maf,
-  MoreArgs = list(alpha = alpha_gwas)
+  maf   = 0.3,
+  alpha = alpha_gwas
 )
 
 # 5. Output

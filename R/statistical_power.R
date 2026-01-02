@@ -12,7 +12,7 @@
 #' (the higher the number, the greater the statistical power)
 #' @export
 
-get_gwas_power <- function(n, beta, maf= 0.3, alpha) {
+get_gwas_power <- function(n, beta, maf= 0.3, alpha= 5e-8) {
   var_g <- 2 * maf * (1 - maf)
   
   # Here we square (beta^2), so the negative sign disappears.

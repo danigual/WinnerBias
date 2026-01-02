@@ -26,14 +26,14 @@ SCENARIOS <- list(
     n_snps    = 1000,
     n_causal  = 100,
     h2        = 0.5,
-    mean_beta = 0.2,     
+    mean_beta = 0.5,     
     seed      = 222
   ),
   
   # Stage 2
   "Stage_2" = list(
     n_samples = 2000,
-    n_snps    = 10000,
+    n_snps    = 1000,
     n_causal  = 100,
     h2        = 0.5,
     mean_beta = 0.5,   

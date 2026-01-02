@@ -3,7 +3,7 @@
 # 1. Dynamic Configuration & Tools
 # ------------------------------------------------------------------------------
 # If run standalone (without Master Script), default to Stage 2
-if(!exists("STAGE_NAME")) {
+if(!exists("PARAMS")) {
   STAGE_NAME <- "Stage_2"
   PARAMS <- list(
     n_samples = 1000, 
