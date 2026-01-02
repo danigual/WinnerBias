@@ -12,8 +12,8 @@ SCENARIOS <- list(
   
   # Stage 0
   "Stage_0" = list(
-    n_samples = 10000, 
-    n_snps    = 10000,
+    n_samples = 50000, 
+    n_snps    = 1000,
     n_causal  = 100,
     h2        = 0.5,
     mean_beta = 0.5,    
@@ -22,8 +22,8 @@ SCENARIOS <- list(
   
   # Stage 1
   "Stage_1" = list(
-    n_samples = 2000,
-    n_snps    = 10000,
+    n_samples = 7000,
+    n_snps    = 1000,
     n_causal  = 100,
     h2        = 0.5,
     mean_beta = 0.2,     
@@ -32,11 +32,11 @@ SCENARIOS <- list(
   
   # Stage 2
   "Stage_2" = list(
-    n_samples = 1000,
+    n_samples = 2000,
     n_snps    = 10000,
     n_causal  = 100,
     h2        = 0.5,
-    mean_beta = 0.125,   
+    mean_beta = 0.5,   
     seed      = 42
   )
 )
