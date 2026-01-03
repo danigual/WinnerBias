@@ -89,7 +89,8 @@ p1 <- ggplot(res, aes(x = true_beta, y = beta_hat)) +
   
   # --- CLEAN THEME APPLIED ---
   theme_classic() + 
-  coord_fixed(xlim = c(-0.6, 0.6), ylim = c(-0.6, 0.6)) + 
+  #coord_fixed(xlim = c(-0.6, 0.6), ylim = c(-0.6, 0.6)) + 
+  coord_fixed() + 
   theme(
     legend.position = "bottom",
     panel.grid.major = element_blank(), 
