@@ -56,9 +56,9 @@ Para aislar el efecto del tamaño muestral, se mantiene constante la arquitectur
 
 | Escenario | Muestra ($N$) | Potencia | Objetivo |
 | :--- | :---: | :---: | :--- |
-| **Stage 0** | 50,000 | Alta (>99%) | **Control Positivo** (Estimación ideal) |
+| **Stage 0** | 50,000 | Alta | **Control Positivo** (Estimación ideal) |
 | **Stage 1** | 7,000 | Media | Transición |
-| **Stage 2** | **2,000** | **Baja (<20%)** | **Simulación del Winner's Curse** |
+| **Stage 2** | **2,000** | **Baja** | **Simulación del Winner's Curse** |
 
 ## 🚀 Instrucciones de Uso
 
