@@ -56,9 +56,9 @@ Para aislar el efecto del tamaño muestral, se mantiene constante la arquitectur
 
 | Escenario | Muestra ($N$) | Potencia | Objetivo |
 | :--- | :---: | :---: | :--- |
-| **Stage 0** | 50,000 | Alta (>99%) | **Control Positivo** (Estimación ideal) |
+| **Stage 0** | 50,000 | Alta | **Control Positivo** (Estimación ideal) |
 | **Stage 1** | 7,000 | Media | Transición |
-| **Stage 2** | **2,000** | **Baja (<20%)** | **Simulación del Winner's Curse** |
+| **Stage 2** | 2,000 | Baja | **Simulación del Winner's Curse** |
 
 ## 🚀 Instrucciones de Uso
 
@@ -98,7 +98,7 @@ Los resultados visuales confirman la hipótesis inicial sobre el comportamiento 
 
 En escenarios de baja potencia, el **Winner's Curse** se hace evidente visualmente al comparar el efecto real (Eje X) frente al efecto estimado por el GWAS (Eje Y).
 
-* **Los "Winners" (Puntos Rojos):** Son las variantes que superaron el umbral de significación ($p < 5 \times 10^{-8}$). Como se observa en la gráfica, estos puntos **flotan sistemáticamente por encima de la línea diagonal** punteada (identidad).
+* **Los "Winners" (Puntos Rojos):** Son las variantes que superaron el umbral de significación ($p < 5 \times 10^{-8}$). Como se observa en la gráfica, estos puntos **flotan por encima de la línea diagonal punteada (identidad) cuando son positivos o por debajo cuando son negativos**.
 * **Interpretación:** Esta desviación visual demuestra la **sobreestimación** del efecto. El GWAS "cree" que estas variantes tienen un impacto mayor del que realmente tienen biológicamente.
 
 ![Winner's Curse Plot](output/figures/Stage_2/winners_curse_plot.png)
