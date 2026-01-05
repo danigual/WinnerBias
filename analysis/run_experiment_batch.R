@@ -43,15 +43,15 @@ SCENARIOS <- list(
 
 # 2. Scripts to Execute (The Pipeline)
 # ------------------------------------------------------------------------------
-# We use the scripts in analysis/Stage_2/ as "Master Templates".
+# We use the scripts in analysis/Experiment/ as "Master Templates".
 # Thanks to parameterization, these scripts will adapt to the active Stage.
 scripts_to_run <- c(
-  "analysis/Stage_2/1.0_power_calculation.R",  # Generate the estimated power
-  "analysis/Stage_2/1.1_generate_datasets.R",  # Generate simulation
-  "analysis/Stage_2/1.2_run_gwas.R",           # Run GWAS
-  "analysis/Stage_2/1.3_plot_results.R",       # Plot Real vs Estimated
-  "analysis/Stage_2/1.4_check_bias.R",         # Bias Diagnosis
-  "analysis/Stage_2/1.5_correct_bias.R"        # Bootstrap Correction Attempt
+  "analysis/Experiment/1.0_power_calculation.R",  # Generate the estimated power
+  "analysis/Experiment/1.1_generate_datasets.R",  # Generate simulation
+  "analysis/Experiment/1.2_run_gwas.R",           # Run GWAS
+  "analysis/Experiment/1.3_plot_results.R",       # Plot Real vs Estimated
+  "analysis/Experiment/1.4_check_bias.R",         # Bias Diagnosis
+  "analysis/Experiment/1.5_correct_bias.R"        # Bootstrap Correction Attempt
 )
 
 # 3. Execution Loop
