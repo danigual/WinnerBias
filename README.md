@@ -15,6 +15,8 @@ Este proyecto tiene tres objetivos principales:
 2.  **Cuantificar** la magnitud del sesgo en función del tamaño muestral.
 3.  **Evaluar** la eficacia del método *Bootstrap Bagging* para corregir dicha inflación.
 
+Además, se busca demostrar una paradoja estadística: **¿Es posible tener 0 Falsos Positivos y aun así obtener resultados biológicamente falsos (inflados)?**
+
 ---
 
 ## 🏗️ Estructura del Repositorio
@@ -31,7 +33,8 @@ WinnerBias/
 │
 ├── analysis/                   # Scripts de Análisis
 │   ├── run_experiment_batch.R  # SCRIPT MAESTRO (Ejecuta todo el pipeline)
-│   └── Stage_2/                # Plantillas de ejecución paso a paso
+│   ├── Parameters_selection
+│   └── Experiment/                # Plantillas de ejecución paso a paso
 │       ├── 1.0_power_calculation.R
 │       ├── 1.1_generate_datasets.R
 │       ├── 1.2_run_gwas.R
@@ -41,12 +44,28 @@ WinnerBias/
 │
 ├── data/                       # Datos simulados (.rds)
 └── output/                     # Resultados
-
-
     ├── figures/                # Gráficos generados
     └── Stage_X/                # Reportes de métricas (.csv)
 ```
 ---
+
+## 💻 Entorno y Reproducibilidad
+
+Para garantizar la reproducibilidad técnica absoluta y evitar conflictos de dependencias, el proyecto se ha desarrollado en un entorno controlado.
+
+    Lenguaje: R versión 4.3.3
+
+    Gestor de Entornos: Conda
+
+    Dependencias Clave: dplyr, ggplot2
+
+Para replicar el entorno exacto:
+
+```bash
+conda create -n winnerbias_env r-base=4.3.3
+conda activate winnerbias_env
+Rscript analysis/run_experiment_batch.R
+```
 
 ## ⚙️ Escenarios Experimentales
 
@@ -118,7 +137,7 @@ Este estudio demuestra que, en condiciones de potencia extremadamente baja ($N=2
 
 **Líneas futuras de investigación:**
 
-* **Replicación Externa:** La solución "gold standard". Validación de los candidatos descubiertos en una cohorte independiente (Stage 3 proyectado) para filtrar falsos positivos.
+* **Replicación Externa:** Validación de los candidatos descubiertos en una cohorte independiente para filtrar falsos positivos.
 * **Métodos Avanzados:** Implementación de correcciones más sofisticadas como **FIQT** (Winner’s Curse correction via FIQT, *Forde et al.*) o aproximaciones **Bayesianas** (Empirical Bayes).
 * **Impacto en PRS:** Evaluación de cómo esta inflación de los efectos distorsiona el cálculo de los *Polygenic Risk Scores* (PRS) y afecta a su capacidad predictiva en pacientes reales.
 
