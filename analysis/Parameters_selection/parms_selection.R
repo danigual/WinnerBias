@@ -1,8 +1,8 @@
 # analysis/parms_selection.R
 
 #' A graph is created showing how statistical power, of each SNP in a GWAS, changes with 
-#' sample size, number of SNPs tested and effect size.
-#' Taking into account a MAF = 0.3 and an alpha = 0.05.
+#' sample size and effect size.
+#' Taking into account a MAF = 0.3 and an alpha = 5e-8.
 #' 
 #' These graph will help us determine the parameters to use in each scenario.
 
@@ -14,20 +14,18 @@ library(dplyr)
 source("R/statistical_power.R")
 
 # parameters
-Ns_to_test     <- c(500, 1000, 5000, 10000)
+Ns_to_test     <- c(2000, 7000, 50000)
 betas_to_test  <- seq(0, 1, by = 0.1)
-Nsnps_to_test  <- c(1e2, 1e3, 1e4)
 maf_fixed      <- 0.3
 
 # create table of combinations
 grid <- expand.grid(
   N     = Ns_to_test,
-  beta  = betas_to_test,
-  Nsnps = Nsnps_to_test
+  beta  = betas_to_test
 )
 
-# calculate Bonferroni alpha
-grid$alpha <- 0.05 / grid$Nsnps
+# set alpha
+grid$alpha <- 5e-8 
 
 # calculate statistical power
 grid$power <- mapply(
@@ -39,27 +37,20 @@ grid$power <- mapply(
 )
 
 # plot
-p_power <- ggplot(grid, aes(x = beta, y = power, color = as.factor(Nsnps))) +
-  geom_line(size = 1.2) +
+p_power <- ggplot(grid, aes(x = beta, y = power)) +
+  geom_line(size = 1.2, color="blue") +
   facet_wrap(~ N, nrow = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
   scale_x_continuous(expand = expansion(mult = 0.05)) +
   labs(
-    title = "Potencia estadística de cada SNP en función de N, β y número total de SNPs",
-    subtitle = "MAF fijo = 0.3, umbral Bonferroni = 0.05 / N_SNPs",
+    title = "Potencia estadística de cada SNP en función de N y β ",
+    subtitle = "MAF = 0.3, alpha = 5e-8 ",
     x = "Beta (tamaño del efecto)",
-    y = "Potencia",
-    color = "N SNPs"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(
-    strip.text = element_text(size = 14, face = "bold"),
-    legend.position = "bottom"
-  )
+    y = "Potencia")
 
 print(p_power)
 
-# Save
+# save DATA
 
 if(!dir.exists("output")) dir.create("output")
 ggsave("output/figures/power_curves.png", p_power, width = 8, height = 6)

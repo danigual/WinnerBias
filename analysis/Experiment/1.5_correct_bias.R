@@ -1,8 +1,4 @@
-# analysis/Stage_2/1.5_correct_bias.R
-
-# ==============================================================================
-# SCRIPT 1.5: WINNER'S CURSE CORRECTION (BOOTSTRAP BAGGING)
-# ==============================================================================
+# analysis/Experiment/1.5_correct_bias.R
 
 library(dplyr)
 library(ggplot2)
@@ -10,7 +6,7 @@ library(tidyr)
 
 # 1. Dynamic Configuration & Load Tools
 # ------------------------------------------------------------------------------
-if(!exists("STAGE_NAME")) STAGE_NAME <- "Stage_2"
+if(!exists("STAGE_NAME")) STAGE_NAME <- "Experiment"
 
 if(!file.exists("R/bootstrap_correction.R")) stop("ATTENTION! R/bootstrap_correction.R is missing")
 source("R/bootstrap_correction.R")

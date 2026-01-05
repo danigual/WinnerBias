@@ -1,12 +1,12 @@
-# analysis/Stage_2/1.4_check_bias.R
+# analysis/Experiment/1.4_check_bias.R
 
 library(dplyr)
 library(ggplot2)
 
 # 1. Dynamic Configuration & Load Results
 # ------------------------------------------------------------------------------
-# If run standalone, defaults to Stage_2
-if(!exists("STAGE_NAME")) STAGE_NAME <- "Stage_2"
+# If run standalone, defaults to Experiment
+if(!exists("STAGE_NAME")) STAGE_NAME <- "Experiment"
 
 # Dynamic path for input
 results_file <- file.path("data/processed", STAGE_NAME, "gwas_results.rds")

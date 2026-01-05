@@ -1,11 +1,11 @@
-# analysis/Stage_2/1.2_run_gwas.R
+# analysis/Experiment/1.2_run_gwas.R
 
 # 1. Load tools
 source("R/gwas_engine.R")
 
 # Dynamic Configuration
 # If run standalone, defaults to Stage_2. If run by Master Script, uses the active Stage.
-if(!exists("STAGE_NAME")) STAGE_NAME <- "Stage_2"
+if(!exists("STAGE_NAME")) STAGE_NAME <- "Experiment"
 
 # 2. Load data
 # Dynamic path: reads from the folder corresponding to the active Stage
@@ -14,7 +14,7 @@ input_file <- file.path("data/processed", STAGE_NAME, "simulacion_wc.rds")
 # Safety check
 if(!file.exists(input_file)) {
   stop(paste0("FATAL ERROR! 'simulacion_wc.rds' not found in ", STAGE_NAME, 
-              ".\n    -> Please run first: analysis/Stage_2/1.1_generate_datasets.R"))
+              ".\n    -> Please run first: analysis/Experiment/1.1_generate_datasets.R"))
 }
 
 message(paste0(">>> Loading simulation data (", STAGE_NAME, ")..."))

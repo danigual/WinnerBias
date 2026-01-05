@@ -1,12 +1,12 @@
-# analysis/Stage_2/1.3_plot_results.R
+# analysis/Experiment/1.3_plot_results.R
 
 # 1. Load libraries and Dynamic Config
 library(ggplot2)
 library(dplyr)
 
 # Dynamic Configuration
-# If run standalone, defaults to Stage_2. If run by Master Script, uses the active Stage.
-if(!exists("STAGE_NAME")) STAGE_NAME <- "Stage_2"
+# If run standalone, defaults to Experiment. If run by Master Script, uses the active Stage.
+if(!exists("STAGE_NAME")) STAGE_NAME <- "Experiment"
 
 # 2. Load Results
 # Dynamic path: reads from the folder corresponding to the active Stage

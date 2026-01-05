@@ -1,10 +1,10 @@
-# analysis/Stage_2/1.1_generate_datasets.R
+# analysis/Experiment/1.1_generate_datasets.R
 
 # 1. Dynamic Configuration & Tools
 # ------------------------------------------------------------------------------
-# If run standalone (without Master Script), default to Stage 2
+# If run standalone (without Master Script), default to Experiment
 if(!exists("PARAMS")) {
-  STAGE_NAME <- "Stage_2"
+  STAGE_NAME <- "Experiment"
   PARAMS <- list(
     n_samples = 1000, 
     n_snps    = 10000, 
@@ -13,7 +13,7 @@ if(!exists("PARAMS")) {
     mean_beta = 0.125, 
     seed      = 42
   )
-  message("⚠ Running in Standalone Mode (Default: Stage_2)")
+  message("⚠ Running in Standalone Mode (Default: Experiment)")
 }
 
 source("R/sim_genetics.R")

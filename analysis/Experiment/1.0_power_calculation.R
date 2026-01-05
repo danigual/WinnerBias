@@ -1,7 +1,7 @@
-# analysis/Stage_2/1.1_power_calculation.R
+# analysis/Experiment/1.1_power_calculation.R
 
 #' Before conducting the experiment, the statistical power is calculated in 
-#' order to identify its quality. if it is 0.8, 
+#' order to identify its quality. if it is > 0.8, 
 #' the experiment has good statistical power.
 
 # load required libraries and functions
@@ -13,7 +13,7 @@ source("R/statistical_power.R")
 # If run standalone (without Master Script), define defaults (Stage 2)
 
 if (!exists("PARAMS")) {
-  STAGE_NAME <- "Stage_2"
+  STAGE_NAME <- "Experiment"
   
   PARAMS <- list(
     n_samples = 2000, 
@@ -21,17 +21,17 @@ if (!exists("PARAMS")) {
     n_causal  = 100, 
     h2        = 0.5, 
     mean_beta = 0.5, 
-    seed      = 42,
-    maf       = 0.3
+    seed      = 42
   )
-  message("⚠ Running in Standalone Mode (Default: Stage_2)")
+  message("⚠ Running in Standalone Mode (Default: Experiment)")
 }
 
 # 2. Set parameters
 #-------------------------------------------------------------------------------
 # set seed, alpha and MAF
 set.seed(PARAMS$seed)
-alpha_gwas <- 5e-8 / PARAMS$n_snps
+alpha_gwas <- 5e-8 
+maf<-0.3
 
 # 3. simulate data
 #-------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ beta_raw <- rnorm(PARAMS$n_causal, mean = 0, sd = PARAMS$mean_beta)
 
 # genetic variance induced by these betas
 genetic_var_raw <- sum(
-  2 * 0.3 * (1 - 0.3) * beta_raw^2
+  2 * maf * (1 - maf) * beta_raw^2
 )
 
 # scale factor so that the total h2 is as desired
@@ -54,7 +54,7 @@ power_per_snp <- mapply(
   get_gwas_power,
   n     = PARAMS$n_samples,
   beta  = abs(beta_causal),
-  maf   = 0.3,
+  maf   = maf,
   alpha = alpha_gwas
 )
 
